@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'django_celery_beat',
+    'django_celery_results',
     'flightstats',
     'flights',
 ]
@@ -135,8 +136,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
+CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_ONCE = {
+    'backend': 'celery_once.backends.File',
+    'settings': {
+        'location': '/tmp/celery_once',
+        'default_timeout': 60 * 60,
+    },
+}
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_REDIS_MAX_CONNECTIONS = 1
+CELERY_ENABLED = True
 
 
 # redis settings

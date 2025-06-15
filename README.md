@@ -46,7 +46,7 @@ flightstats scraping
    ```sh
    $ psql postgres
    ```
-2. Run SQL to create user **insurance** and database **insurance**.
+2. Run SQL to create user **flightstats** and database **flightstats**.
    ```sql
    CREATE ROLE flightstats WITH LOGIN PASSWORD 'flightstats';
    ALTER ROLE flightstats CREATEDB;
@@ -89,9 +89,9 @@ flightstats scraping
    ```sh
    $ cd ./src
    # Queued async tasks
-   $ celery -A insurance worker -l DEBUG
+   $ celery -A flightstats worker -l DEBUG
    # Periodic tasks
-   $ celery -A insurance beat -l DEBUG
+   $ celery -A flightstats beat -l DEBUG
    ```
 
 2. Install Python libraries.

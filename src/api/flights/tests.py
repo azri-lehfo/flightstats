@@ -1,13 +1,16 @@
-from django.test import TestCase, Client
-from django.urls import reverse
-from unittest.mock import patch
-import json
 from datetime import date
+import json
+
+from django.test import TestCase, Client, override_settings
+from django.urls import reverse
+
+from unittest.mock import patch
 
 # Get today's date for dynamic testing
 TODAY_DATE_STR = date.today().strftime('%Y-%m-%d')
 
 
+@override_settings(CELERY_ENABLED=False)
 class FlightStatusAPITest(TestCase):
     def setUp(self):
         self.client = Client()

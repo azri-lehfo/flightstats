@@ -5,6 +5,7 @@ django-filter==25.1  # For filtering querysets in views
 django-celery-beat==2.8.1  # For handling asynchronous tasks
 django-redis==5.4.0  # For caching and session storage
 django-silk==5.4.0  # For profiling and inspecting requests
+django-celery-results==2.6.0  # For storing Celery task results
 
 # Django REST Framework
 djangorestframework==3.16.0
@@ -13,3 +14,5 @@ djangorestframework-link-header-pagination==0.1.1  # For link header pagination
 # Others
 psycopg2-binary==2.9.10  # PostgreSQL database adapter
 coverage==7.9.1
+celery==5.5.3  # For handling asynchronous tasks
+celery_once==3.0.1  # For ensuring tasks are only executed once

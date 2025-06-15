@@ -133,3 +133,8 @@ whoosh_index
 .npm/
 node_modules/
 .mypy_cache/
+
+dump.rdb
+
+# Coverage files
+.coverage

@@ -6,6 +6,8 @@ from rest_framework import serializers
 
 from flights.models import Flight
 
+from .tasks import get_flight_details
+
 
 class FlightSerializer(serializers.ModelSerializer):
 
@@ -22,37 +24,33 @@ class FlightSerializer(serializers.ModelSerializer):
     def _fetch_from_api(self, airline: str, flight_number: str, departure_date: str) -> dict:
         """
         Fetch flight details from an external API.
+        will use celery if CELERY_ENABLED is set to True.
+        """
+        if settings.CELERY_ENABLED:
+            # If Celery is enabled, use the task to fetch flight details
+            result = get_flight_details.delay(airline, flight_number, departure_date)
+            results = result.get(timeout=30)  # waits up to 30 seconds for the result
+        else:
+            # If Celery is not enabled, fetch flight details directly
+            results = get_flight_details(airline, flight_number, departure_date)
+
+        response = results['data']
+        status_code = results['status_code']
+        if status_code == 500:
+            raise serializers.ValidationError("External API error.")
+        elif status_code != 200:
+            raise serializers.ValidationError("No flight found with the provided parameters.")
+
+        return response
+
+    def _get_flight_from_api(self, airline: str, flight_number: str, departure_date: str) -> Flight:
+        """
+        Fetch flight details from an external API.
         This method should be implemented to call the actual API and return a Flight instance.
         Store the flight data in the database if it does not exist.
         """
-        url = settings.API_URL
-        if not url:
-            raise serializers.ValidationError("Flight API URL is not configured in settings.")
-
-        year = departure_date.split('-')[0]
-        month = departure_date.split('-')[1]
-        day = departure_date.split('-')[2]
-
-        response = requests.get(
-            url.format(
-                airline=airline,
-                flight_number=flight_number,
-                year=year,
-                month=month,
-                day=day
-            ),
-            timeout=10,
-        )
-        if response.status_code == 500:
-            raise serializers.ValidationError("External API error.")
-        elif response.status_code != 200:
-            raise serializers.ValidationError("No flight found with the provided parameters.")
-
-        data = response.json()
-        return data
-
-    def _get_flight_from_api(self, airline: str, flight_number: str, departure_date: str) -> Flight:
         data = self._fetch_from_api(airline, flight_number, departure_date)
+
         if not data:
             raise serializers.ValidationError("No flight data found.")
         flight = Flight.objects.create(
